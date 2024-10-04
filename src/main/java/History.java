@@ -1,7 +1,11 @@
+import java.util.*;
+
+//import MyStack.Node;
 public class History
 {
 
-
+	public Stack<Event> undoStack = new Stack<Event>();
+	public Stack<Event> redoStack = new Stack<Event>();
 
     /**
        Notepad will call this function when thier text changes.
@@ -12,16 +16,31 @@ public class History
      */
    public void addEvent(boolean deletion, int position, String Change)
    {
+	   Event E = new Event(deletion,position,Change);
+	   undoStack.push(E);
+	   redoStack.clear();
    }
 
-
-    /**
+	/**
        Notepad will call this function when it wishes to undo the last event.
 
        note is a variable to the Notepad that called this function
      */
    public void undoEvent(NotePad note)
    {
+	   if (this.hasUndoData() == true)
+	   {
+		   Event T = undoStack.pop();
+		   redoStack.push(T);
+		   if (T.deletion == true)
+		   {
+			   note.insert(T.position, T.Change);
+		   }
+		   else
+		   {
+			   note.remove(T.position, T.Change.length());
+		   }
+	   }
    }
 
 
@@ -32,7 +51,19 @@ public class History
      */
    public void redoEvent(NotePad note)
    {
-   	
+	   if (this.hasReDoData() == true)
+	   {
+		   Event T = redoStack.pop();
+		   undoStack.push(T);
+		   if (T.deletion == true)
+		   {
+			   note.remove(T.position, T.Change.length());
+		   }
+		   else
+		   {
+			   note.insert(T.position, T.Change);
+		   }
+	   }
    }
 
     /**
@@ -40,7 +71,11 @@ public class History
      */
    public boolean hasUndoData()
    {
-       return false;
+       if (undoStack.isEmpty() == true)
+       {
+    	   return false;
+       }
+	   return true;
    }
 
     /**
@@ -48,7 +83,11 @@ public class History
      */
    public boolean hasReDoData()
    {
-       return false;
+	   if (redoStack.isEmpty() == true)
+       {
+    	   return false;
+       }
+	   return true;
    }
 	
 
